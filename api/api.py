@@ -10,6 +10,12 @@ def api():
         'completed': "false"
     }
 
+@app.route('/cards', methods=['POST', 'GET'])
+class FlashCard(db.Column):
+    pass
+
+
+
 
 
 

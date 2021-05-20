@@ -3,12 +3,12 @@
 }
 
 .FlashCard {
-  background-color: blanchedalmond;
   text-align: center;
   vertical-align: middle;
   height: 100px;
-  width: 100px;
-  margin: 10px
+  width: 200px;
+  margin: 10px;
+  box-shadow: 3px 5px;
 }
 
 .App-logo {
