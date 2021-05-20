@@ -2,6 +2,15 @@
   text-align: center;
 }
 
+.FlashCard {
+  background-color: blanchedalmond;
+  text-align: center;
+  vertical-align: middle;
+  height: 100px;
+  width: 100px;
+  margin: 10px
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
