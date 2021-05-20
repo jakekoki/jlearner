@@ -11,12 +11,31 @@ class App extends Component {
     };
   }
 
+  addFlashCard(front="front", back="back") { 
+    var flashcards = this.state.flashcards.slice(0, this.state.flashcards.length);
+    flashcards.push({
+      front: front, 
+      back: back
+    })
+
+    this.setState({
+      flashcards : flashcards
+    })
+  }
+
   render() {
     return (
       <div className="App">
-        <FlashCard front={"sdf"} back={"asdf"} />
-        <FlashCard front={"sdf"} back={"asdf"} />
-        <FlashCard front={"sdf"} back={"asdf"} />
+        <div className="NewCardForm">
+          <button onClick={() => this.addFlashCard()}>Push me, daddy.</button>
+        </div>
+        {console.log(this.state.flashcards)}
+        {this.state.flashcards.map((card, idx) => {
+          return (
+            <FlashCard front={card.front} back={card.back} />
+          )
+        })}
+
       </div>
     );
   }
