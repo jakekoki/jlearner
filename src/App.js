@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import FlashCard from './components/FlashCard';
 import "./App.css";
+import React, { Component } from "react";
 
+import FlashCard from "./components/FlashCard";
 
 class App extends Component {
   constructor(props) {
@@ -11,31 +11,44 @@ class App extends Component {
     };
   }
 
-  addFlashCard(front="front", back="back") { 
-    var flashcards = this.state.flashcards.slice(0, this.state.flashcards.length);
-    flashcards.push({
-      front: front, 
-      back: back
+  componentDidMount() {
+    console.log(this.state)
+    fetch("http://127.0.0.1:5000/api")
+    .then(data => data.json())
+    .then(res => {
+      console.log(res);
+      this.setState({flashcards : res.cards})
     })
+  }
 
-    this.setState({
-      flashcards : flashcards
-    })
+  addFlashCard(front = "front", back = "back") {
+    var flashcards = this.state.flashcards.slice(
+      0,
+      this.state.flashcards.length
+    );
+    flashcards.push({
+      front: front,
+      back: back,
+    });
+
+    // this.setState({
+    //   flashcards : flashcards
+    // })
   }
 
   render() {
     return (
       <div className="App">
         <div className="NewCardForm">
-          <button onClick={() => this.addFlashCard()}>Push me, daddy.</button>
+          <form action="/" method="POST">
+            <input type="text" name="front" id="front" />
+            <input type="text" name="back" id="back" />
+            <input type="submit" value="Add Card" />
+          </form>
         </div>
-        {console.log(this.state.flashcards)}
         {this.state.flashcards.map((card, idx) => {
-          return (
-            <FlashCard front={card.front} back={card.back} />
-          )
+          return <FlashCard front={card.front} back={card.back} />;
         })}
-
       </div>
     );
   }
