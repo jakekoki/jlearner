@@ -32,9 +32,6 @@ class FlashCard(db.Model):
     def __repr__(self):
         return "<FlashCard %r>" % self.id
 
-    def as_dict(self):
-       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
 @app.route('/api', methods=['POST', 'GET'])
 def index():
     if request.method == "POST":
@@ -44,8 +41,7 @@ def index():
         try:
             db.session.add(new_card)
             db.session.commit()
-            # redirect("/")
-            return new_card.serializer()
+            return redirect("http://localhost:3000")
         except Exception as e:
             return str(e)
     else:
@@ -53,13 +49,13 @@ def index():
         return {"cards" : serialize_card(cards_query)}
         
 
-@app.route("/delete/<int:id>")
+@app.route("/delete/<int:id>", methods=['POST'])
 def delete(id):
     card_to_delete = FlashCard.query.get_or_404(id)
     try:
         db.session.delete(card_to_delete)
         db.session.commit()
-        return redirect("/")
+        return redirect("http://localhost:3000")
     except:
         return "There was an issue with deleting your task."
 
@@ -67,10 +63,11 @@ def delete(id):
 def update(id):
     card = FlashCard.query.get_or_404(id)
     if request.method == "POST":
-        card.content = request.form['content']
+        card.front = request.form['front']
+        card.back = request.form['back']
         try:
             db.session.commit()
-            return redirect("/")
+            return redirect("http://localhost:3000")
         except:
             return "Something went wrong with updating your task."
 
