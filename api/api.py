@@ -1,10 +1,11 @@
 from datetime import datetime
-import sys
 
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from werkzeug.utils import redirect
+
+import wikipedia
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -74,4 +75,12 @@ def update(id):
 if __name__ == "__main__":
     app.run(debug=True)
 
-
+@app.route("/search/<string:query>", methods=["GET"])
+def search(query):
+    print("search")
+    try:
+        q = wikipedia.search(query)
+        print(q)
+        return {"results" : q}
+    except:
+        return "Something went wrong with your query. :("
