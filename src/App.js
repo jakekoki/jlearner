@@ -9,6 +9,9 @@ class App extends Component {
     this.state = {
       flashcards: [],
       currentSearch: [],
+      currentSearchQ: "",
+      article: "",
+      selection: "",
     };
   }
 
@@ -16,13 +19,42 @@ class App extends Component {
     fetch("http://127.0.0.1:5000/api")
       .then((data) => data.json())
       .then((res) => {
-        console.log(res);
         this.setState({ flashcards: res.cards });
       });
   }
 
-  search(q = "guitar") {
-    fetch(`http://127.0.0.1:5000/search/${q}`, {
+  queryChange(e) {
+    const { value, name } = e.target;
+    this.setState({
+      [name]: value,
+    });
+  }
+
+  querySubmit(e) {
+    e.preventDefault();
+    if (this.state.currentSearchQ) {
+      const currentSearchQ = this.state.currentSearchQ;
+      fetch(`http://127.0.0.1:5000/search/${currentSearchQ}`, {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          "Access-Control-Allow-Origin": "http://127.0.0.1:5000",
+          "Access-Control-Allow-Credentials": true,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((data) => data.json())
+        .then((response) => {
+          this.setState({
+            currentSearch: response.results,
+          });
+        });
+    }
+  }
+
+  getArticle(articleIdx) {
+    const articleTitle = this.state.currentSearch[articleIdx];
+    fetch(`http://127.0.0.1:5000/article/${articleTitle}`, {
       method: "GET",
       mode: "cors",
       headers: {
@@ -31,20 +63,44 @@ class App extends Component {
         "Content-Type": "application/json",
       },
     })
-      .then((data) => (data ? data.json() : {}))
-      .then((response) =>
+      .then((data) => data.json())
+      .then((response) => {
+        localStorage.setItem("article", response.article);
         this.setState({
-          currentSearch: response.results,
-        })
-      );
+          article: localStorage.getItem("article"),
+        });
+      });
+  }
+
+  getSelectionText() {
+    var text = "";
+    if (window.getSelection) {
+      text = window.getSelection().toString();
+    } else if (document.selection && document.selection.type !== "Control") {
+      text = document.selection.createRange().text;
+    }
+    this.setState({
+      selection: text,
+    });
   }
 
   render() {
-    {
-      console.log(this.state);
-    }
     return (
       <div className="App">
+        <div>
+        {
+          document.onmouseup = () => {
+            const select = window.getSelection().toString();
+            if (select) {
+              this.setState({
+                selection: select
+              })
+              return <p>can you see this?</p>
+            }
+          }
+        }
+        </div>
+        {console.log(this.state)}
         <div className="NewCardForm">
           <form action="/api" method="POST">
             <input type="text" name="front" id="front" />
@@ -52,8 +108,16 @@ class App extends Component {
             <input type="submit" value="Add Card" />
           </form>
         </div>
-        <button onClick={() => this.search()}>click me daddy</button>
-
+        <div>
+          <form onSubmit={(e) => this.querySubmit(e)}>
+            <input
+              type="text"
+              name="currentSearchQ"
+              onChange={(e) => this.queryChange(e)}
+            />
+            <input type="submit" />
+          </form>
+        </div>
         <div className="CardPane">
           {this.state.flashcards.map((card, idx) => {
             return (
@@ -63,8 +127,13 @@ class App extends Component {
         </div>
         <div className="SearchResults">
           {this.state.currentSearch.map((result, idx) => {
-            return <div ><a href="">{result}</a> </div>;
+            return (
+              <button onClick={() => this.getArticle(idx)}>{result}</button>
+            );
           })}
+        </div>
+        <div className="article">
+          {this.state.article ? this.state.article : "No article present."}
         </div>
       </div>
     );

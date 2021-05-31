@@ -33,6 +33,9 @@ class FlashCard(db.Model):
     def __repr__(self):
         return "<FlashCard %r>" % self.id
 
+# class Article(db.Model):
+#     pass
+
 @app.route('/api', methods=['POST', 'GET'])
 def index():
     if request.method == "POST":
@@ -72,15 +75,21 @@ def update(id):
         except:
             return "Something went wrong with updating your task."
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
 @app.route("/search/<string:query>", methods=["GET"])
 def search(query):
-    print("search")
     try:
         q = wikipedia.search(query)
         print(q)
         return {"results" : q}
     except:
         return "Something went wrong with your query. :("
+
+@app.route("/article/<string:title>", methods=["GET"])
+def get_article(title):
+    page = wikipedia.page(title)
+
+    return {"article" : page.content}
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
