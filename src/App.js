@@ -8,7 +8,7 @@ class App extends Component {
     super(props);
     this.state = {
       flashcards: [],
-      currentSearch: [],
+      currentSearchResults: [],
       currentSearchQ: "",
       article: "",
       selection: "",
@@ -24,6 +24,7 @@ class App extends Component {
   }
 
   queryChange(e) {
+    e.preventDefault();
     const { value, name } = e.target;
     this.setState({
       [name]: value,
@@ -46,14 +47,15 @@ class App extends Component {
         .then((data) => data.json())
         .then((response) => {
           this.setState({
-            currentSearch: response.results,
+            currentSearchResults: response.results,
           });
         });
     }
   }
 
-  getArticle(articleIdx) {
-    const articleTitle = this.state.currentSearch[articleIdx];
+  getArticle(e, articleIdx) {
+    e.preventDefault();
+    const articleTitle = this.state.currentSearchResults[articleIdx];
     fetch(`http://127.0.0.1:5000/article/${articleTitle}`, {
       method: "GET",
       mode: "cors",
@@ -88,17 +90,17 @@ class App extends Component {
     return (
       <div className="App">
         <div>
-        {
-          document.onmouseup = () => {
-            const select = window.getSelection().toString();
-            if (select) {
-              this.setState({
-                selection: select
-              })
-              return <p>can you see this?</p>
-            }
+          {
+            (document.onmouseup = () => {
+              const select = window.getSelection().toString();
+              if (select) {
+                this.setState({
+                  selection: select,
+                });
+                return <p>can you see this?</p>;
+              }
+            })
           }
-        }
         </div>
         {console.log(this.state)}
         <div className="NewCardForm">
@@ -126,11 +128,15 @@ class App extends Component {
           })}
         </div>
         <div className="SearchResults">
-          {this.state.currentSearch.map((result, idx) => {
-            return (
-              <button onClick={() => this.getArticle(idx)}>{result}</button>
-            );
-          })}
+          <ul>
+            {this.state.currentSearchResults.map((result, idx) => {
+              return (
+                <li>
+                  <a onClick={(e) => this.getArticle(e, idx)}>{result}</a>
+                </li>
+              );
+            })}
+          </ul>
         </div>
         <div className="article">
           {this.state.article ? this.state.article : "No article present."}
