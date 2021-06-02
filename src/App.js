@@ -11,7 +11,7 @@ class App extends Component {
       currentSearchResults: [],
       currentSearchQ: "",
       article: "",
-      selection: "",
+      currentHighlight: "",
     };
   }
 
@@ -39,8 +39,8 @@ class App extends Component {
         method: "GET",
         mode: "cors",
         headers: {
-          "Access-Control-Allow-Origin": "http://127.0.0.1:5000",
-          "Access-Control-Allow-Credentials": true,
+          // "Access-Control-Allow-Origin": "http://127.0.0.1:5000",
+          // "Access-Control-Allow-Credentials": true,
           "Content-Type": "application/json",
         },
       })
@@ -53,15 +53,42 @@ class App extends Component {
     }
   }
 
+  makeCardFromHighlight(e) {
+    e.preventDefault();
+    if (this.state.currentHighlight) {
+      const front = this.state.currentHighlight;
+      const back = front.split("").reverse().join("");
+      const card = {
+        front: front,
+        back: back,
+      };
+      fetch(`http://127.0.0.1:5000/api`, {
+        method: "POST",
+        mode: "no-cors",
+        // headers: {
+        //   "Access-Control-Allow-Origin": "http://127.0.0.1:5000/api",
+        //   "Access-Control-Allow-Credentials": true,
+        //   "Content-Type": "application/json",
+        // },
+        body: JSON.stringify(card),
+      }).then(() => {
+        localStorage.setItem("flashcards", JSON.stringify(this.state.flashcards));
+        this.setState({
+          flashcards: JSON.parse(localStorage.getItem("flashcards")) || []
+        });
+      });
+    }
+  }
+
   getArticle(e, articleIdx) {
     e.preventDefault();
     const articleTitle = this.state.currentSearchResults[articleIdx];
     fetch(`http://127.0.0.1:5000/article/${articleTitle}`, {
       method: "GET",
-      mode: "cors",
       headers: {
         "Access-Control-Allow-Origin": "http://127.0.0.1:5000",
         "Access-Control-Allow-Credentials": true,
+        mode: "no-cors",
         "Content-Type": "application/json",
       },
     })
@@ -78,11 +105,14 @@ class App extends Component {
     var text = "";
     if (window.getSelection) {
       text = window.getSelection().toString();
-    } else if (document.selection && document.selection.type !== "Control") {
-      text = document.selection.createRange().text;
+    } else if (
+      document.currentHighlight &&
+      document.currentHighlight.type !== "Control"
+    ) {
+      text = document.currentHighlight.createRange().text;
     }
     this.setState({
-      selection: text,
+      currentHighlight: text,
     });
   }
 
@@ -95,7 +125,7 @@ class App extends Component {
               const select = window.getSelection().toString();
               if (select) {
                 this.setState({
-                  selection: select,
+                  currentHighlight: select,
                 });
                 return <p>can you see this?</p>;
               }
@@ -128,7 +158,9 @@ class App extends Component {
           })}
         </div>
         <div className="SearchResults">
-          <ul>
+          {/* TODO: get rid of the style flag and put it in the css file
+          I know inline styling isn't 'proper' or whatever */}
+          <ul style={{ "list-style-type": "none" }}>
             {this.state.currentSearchResults.map((result, idx) => {
               return (
                 <li>
@@ -138,9 +170,12 @@ class App extends Component {
             })}
           </ul>
         </div>
-        <div className="article">
-          {this.state.article ? this.state.article : "No article present."}
-        </div>
+        <button
+          onClick={(e) => this.makeCardFromHighlight(e)}
+        >
+          Make card
+        </button>
+        <div className="article">{this.state.article}</div>
       </div>
     );
   }

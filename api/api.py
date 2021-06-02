@@ -1,3 +1,4 @@
+import json 
 from datetime import datetime
 
 from flask import Flask, request
@@ -10,6 +11,7 @@ import wikipedia
 app = Flask(__name__)
 cors = CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+client_url = "http://localhost:3000"
 db = SQLAlchemy(app)
 
 def serialize_card(q):
@@ -33,19 +35,19 @@ class FlashCard(db.Model):
     def __repr__(self):
         return "<FlashCard %r>" % self.id
 
-# class Article(db.Model):
-#     pass
-
 @app.route('/api', methods=['POST', 'GET'])
 def index():
     if request.method == "POST":
-        front = request.form['front']
-        back = request.form['back']
+        # gotta process the raw string 
+        card_str = request.get_data().decode('utf-8').replace("'", '"')
+        card_json = json.loads(card_str)
+        front = card_json["front"]
+        back = card_json["back"]
         new_card = FlashCard(front=front, back=back)
         try:
             db.session.add(new_card)
             db.session.commit()
-            return redirect("http://localhost:3000")
+            return redirect(client_url)
         except Exception as e:
             return str(e)
     else:
@@ -59,7 +61,7 @@ def delete(id):
     try:
         db.session.delete(card_to_delete)
         db.session.commit()
-        return redirect("http://localhost:3000")
+        return redirect(client_url)
     except:
         return "There was an issue with deleting your task."
 
@@ -71,7 +73,7 @@ def update(id):
         card.back = request.form['back']
         try:
             db.session.commit()
-            return redirect("http://localhost:3000")
+            return redirect(client_url)
         except:
             return "Something went wrong with updating your task."
 
@@ -79,7 +81,6 @@ def update(id):
 def search(query):
     try:
         q = wikipedia.search(query)
-        print(q)
         return {"results" : q}
     except:
         return "Something went wrong with your query. :("
