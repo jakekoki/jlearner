@@ -15,7 +15,7 @@ class Project extends Component {
   }
 
   componentDidMount() {
-    fetch("http://127.0.0.1:5000/api")
+    fetch("http://127.0.0.1:5000/cards")
       .then((data) => data.json())
       .then((res) => {
         this.setState({ flashcards: res.cards });
@@ -59,11 +59,11 @@ class Project extends Component {
         front: front,
         back: back,
       };
-      fetch(`http://127.0.0.1:5000/api`, {
+      fetch(`http://127.0.0.1:5000/cards`, {
         method: "POST",
         mode: "no-cors",
         // headers: {
-        //   "Access-Control-Allow-Origin": "http://127.0.0.1:5000/api",
+        //   "Access-Control-Allow-Origin": "http://127.0.0.1:5000/cards",
         //   "Access-Control-Allow-Credentials": true,
         //   "Content-Type": "application/json",
         // },
@@ -146,7 +146,7 @@ class Project extends Component {
         <div className="SearchResults">
           {/* TODO: get rid of the style flag and put it in the css file
               I know inline styling isn't 'proper' or whatever */}
-          <ul style={{ "list-style-type": "none" }}>
+          <ul>
             {this.state.currentSearchResults.map((result, idx) => {
               return (
                 <li>

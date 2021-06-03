@@ -25,20 +25,12 @@ class FlashCard extends Component {
     });
   };
 
-  updateCard = () => {
-    const cardId = this.state.id
-    fetch(`http://127.0.0.1:5000/delete/${cardId}`, { method: 'POST', mode: "no-cors" })
-      .then(res => console.log(res))
-    window.location.href = '/'
-  }
-
   deleteCard = () => {
     const cardId = this.state.id
-    fetch(`http://127.0.0.1:5000/delete/${cardId}`, { method: 'POST', mode: "no-cors" })
+    fetch(`http://127.0.0.1:5000/delete_card/${cardId}`, { method: 'POST', mode: "no-cors" })
       .then(res => console.log(res))
     window.location.href = '/'
   }
-
 
   render() {
     const contents = this.getCard();
@@ -46,7 +38,7 @@ class FlashCard extends Component {
       <div className="FlashCard" onClick={(e) => this.flipCard(e)}>
         <div className="noselect">{contents}</div>
         <button onClick={() => this.deleteCard()} style={{verticalAlign: "bottom"}}>delete</button>
-        <form action={`/update/${this.state.id}`} method="POST">
+        <form action={`/update_card/${this.state.id}`} method="POST">
           <input type="text" name="front" id="front" />
           <input type="text" name="back" id="back" />
           <input type="submit" value="Update Card" />

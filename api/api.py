@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from sqlalchemy.orm import relationship
 from werkzeug.utils import redirect
 
 import wikipedia
@@ -14,20 +15,27 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 client_url = "http://localhost:3000"
 db = SQLAlchemy(app)
 
-def serialize_card(q):
-    res = []
-    for card in q:
-        res.append({
-            "id" : card.id,
-            "front" : card.front,
-            "back" : card.back,
-            "date_created" : card.date_created
-        })
+'''
+WHAT AM I DOING LMFAO 
+'''
 
-    return res
+class Project(db.Model):
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    # flashcards = db.relationship("FlashCard")
+    article = db.Column(db.String, nullable=True)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return "<Project {} {} {} {}>".format(
+            self.id, 
+            self.flashcards, 
+            self.article, 
+            self.date_created
+        )
 
 class FlashCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    # project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     front = db.Column(db.String(300), nullable=False)
     back = db.Column(db.String(300), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
@@ -35,8 +43,20 @@ class FlashCard(db.Model):
     def __repr__(self):
         return "<FlashCard %r>" % self.id
 
-@app.route('/api', methods=['POST', 'GET'])
+@app.route('/cards', methods=['POST', 'GET'])
 def index():
+    def serialize_card(q):
+        res = []
+        for card in q:
+            res.append({
+                "id" : card.id,
+                "front" : card.front,
+                "back" : card.back,
+                "date_created" : card.date_created
+            })
+
+        return res
+
     if request.method == "POST":
         # gotta process the raw string 
         card_str = request.get_data().decode('utf-8').replace("'", '"')
@@ -54,18 +74,7 @@ def index():
         cards_query = FlashCard.query.order_by(FlashCard.date_created).all()
         return {"cards" : serialize_card(cards_query)}
         
-
-@app.route("/delete/<int:id>", methods=['POST'])
-def delete(id):
-    card_to_delete = FlashCard.query.get_or_404(id)
-    try:
-        db.session.delete(card_to_delete)
-        db.session.commit()
-        return redirect(client_url)
-    except:
-        return "There was an issue with deleting your task."
-
-@app.route("/update/<int:id>", methods=["POST"])
+@app.route("/update_card/<int:id>", methods=["POST"])
 def update(id):
     card = FlashCard.query.get_or_404(id)
     if request.method == "POST":
@@ -76,6 +85,17 @@ def update(id):
             return redirect(client_url)
         except:
             return "Something went wrong with updating your task."
+
+@app.route("/delete_card/<int:id>", methods=['POST'])
+def delete(id):
+    card_to_delete = FlashCard.query.get_or_404(id)
+    try:
+        db.session.delete(card_to_delete)
+        db.session.commit()
+        return redirect(client_url)
+    except:
+        return "There was an issue with deleting your task."
+
 
 @app.route("/search/<string:query>", methods=["GET"])
 def search(query):
