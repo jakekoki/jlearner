@@ -4,7 +4,6 @@ from datetime import datetime
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from sqlalchemy.orm import relationship
 from werkzeug.utils import redirect
 
 import wikipedia
@@ -95,7 +94,6 @@ def delete(id):
         return redirect(client_url)
     except:
         return "There was an issue with deleting your task."
-
 
 @app.route("/search/<string:query>", methods=["GET"])
 def search(query):
